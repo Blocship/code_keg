@@ -60,8 +60,6 @@ abstract class Permission {
   static Permission photoGallery = Permission._(_PermissionType.photos);
   static Permission notification = Permission._(_PermissionType.notification);
 
-  Permission();
-
   factory Permission._(_PermissionType type) {
     switch (type) {
       case _PermissionType.photos:
@@ -108,3 +106,11 @@ class _NotificationPermission implements Permission {
   }
 }
 ```
+
+# Conclusion
+
+In conclusion, dependency wrapping is a powerful technique that can simplify code, improve modularity, and make it easier to maintain and test. In the case of Flutter permission handling, a custom wrapper class like the one we created can provide a well-defined interface for handling different types of permissions, and can make it easier to switch to a different permission handling library or plugin in the future.
+
+By using dependency wrapping, developers can create more modular and maintainable code, and can reduce the complexity and coupling of their codebase. We hope that this example has provided you with a useful starting point for implementing dependency wrapping in your own Flutter projects.
+
+If you have any questions or comments about this article, please feel free to leave them below. Thank you for reading!
