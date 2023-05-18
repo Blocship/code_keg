@@ -51,20 +51,23 @@ abstract class AppTheme {
 Create and add abstract property to the wrapper class to define the theme properties.
 
 ```dart
-
 class ColorTheme extends ThemeExtension<ColorTheme> {
   final Color primaryColor;
+  final Color secondaryColor;
 
   ColorTheme({
     required this.primaryColor,
+    required this.secondaryColor,
   });
 
- @override
+  @override
   ThemeExtension<ColorTheme> copyWith({
     Color? primaryColor,
+    Color? secondaryColor,
   }) {
     return ColorTheme(
       primaryColor: primaryColor ?? this.primaryColor,
+      secondaryColor: secondaryColor ?? this.secondaryColor,
     );
   }
 
@@ -78,24 +81,30 @@ class ColorTheme extends ThemeExtension<ColorTheme> {
     }
     return ColorTheme(
       primaryColor: Color.lerp(primaryColor, other.primaryColor, t)!,
+      secondaryColor: Color.lerp(secondaryColor, other.secondaryColor, t)!,
     );
   }
 }
-
 ```
+
+Now the updated AppTheme class will look like this:
 
 ```dart
 abstract class AppTheme {
+  
+  ColorTheme get colorTheme;
+
   ThemeData get themeData {
     return ThemeData(
-      primaryColor: colorTheme.primaryColor,
+      scaffoldBackgroundColor: colorTheme.primaryColor,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: colorTheme.secondaryColor,
+      ),
       extensions: [
         colorTheme,
-        ],
+      ],
     );
   }
-
-  ColorTheme get colorTheme;
 }
 ```
 
@@ -104,47 +113,95 @@ Now, we can create a new class that extends the AppTheme class and implements th
 ```dart
 class LightTheme extends AppTheme {
   @override
-  ColorTheme get colorTheme => ColorTheme(
-        primaryColor: Colors.white,
-      );
+  final ColorTheme colorTheme = ColorTheme(
+    primaryColor: Colors.indigo.shade50,
+    secondaryColor: Colors.black,
+  );
 }
-```
 
-```dart
 class DarkTheme extends AppTheme {
   @override
-  ColorTheme get colorTheme => ColorTheme(
-        primaryColor: Colors.black,
-      );
+  final ColorTheme colorTheme = ColorTheme(
+    primaryColor: Colors.indigo.shade700,
+    secondaryColor: Colors.white,
+  );
 }
 ```
 
 Finally, we can use the themeData property to access the ThemeData class and apply the theme to our app.
 
 ```dart
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late ThemeMode mode;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initializing the theme mode as light
+    mode = ThemeMode.light;
+  }
+
+  // Toggling the theme mode between light and dark
+  void onThemeChanged() {
+    setState(() {
+      mode = mode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // Using the LightTheme's themeData as the default theme
       theme: LightTheme().themeData,
+      // Using the DarkTheme's themeData as the dark theme
       darkTheme: DarkTheme().themeData,
-      home: MyHomePage(),
+      // Setting the current theme mode
+      themeMode: mode,
+      home: MyHomePage(onChanged: onThemeChanged),
     );
   }
 }
 
 class MyHomePage extends StatelessWidget {
+  final void Function() onChanged;
+  const MyHomePage({super.key, required this.onChanged});
+
   @override
   Widget build(BuildContext context) {
-    final colorTheme = context.colorTheme.primaryColor;
-    final theme = context.theme;
     return Scaffold(
-      backgroundColor: theme.primaryColor,
+      // Accessing the scaffold background color from the current theme
+      backgroundColor: context.theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: colorTheme.primaryColor,
+        // Accessing the secondary color from the current theme's color theme extension
+        backgroundColor: context.colorTheme.secondaryColor,
+      ),
+      body: const Center(
+        child: Text('Hello, World!'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: onChanged,
+        child: Icon(
+          Icons.brightness_4,
+          // Accessing the primary color from the current theme's color theme extension
+          color: context.colorTheme.primaryColor,
+        ),
       ),
     );
   }
+}
+```
+
+```dart
+extension XBuildContext on BuildContext {
+  ThemeData get theme => Theme.of(this);
+  ColorTheme get colorTheme => theme.extension<ColorTheme>()!;
 }
 ```
 
