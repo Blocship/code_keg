@@ -14,76 +14,41 @@ Theming is a crucial aspect of developing high-quality mobile applications, and 
 
 # Challenges of Implementing Dual Themes in Flutter App
 
-While implementing themes in Flutter can be a powerful tool for creating consistent and visually appealing apps, it also comes with its own set of challenges. Here are some of the common challenges that developers may face when working with themes in Flutter:
+Implementing themes in Flutter can greatly enhance the visual appeal and consistency of apps. However, it's important to be aware of certain limitations that can arise when working with ThemeData, the primary API for theming in Flutter. Here are some of the challenges I encountered during my exploration:
 
-1. In ThemeData the properties are nullable. So if developer is creating 2 instances of ThemeData, one for light theme and one for dark theme, then he/she can easily forget to set some properties in one of the instances. This can lead to inconsistent UI.
+1. **Coupling with Material Widgets:** ThemeData is closely tied to Material Widgets and MaterialApp. While the introduction of the extension API allows for some extension of theme data, it may not provide sufficient flexibility in all scenarios.
+2. **Dependency on ThemeData:** I found that it is not possible to completely replace the ThemeData class with a custom class. To leverage the full capabilities of Material Widgets, reliance on ThemeData is necessary, which can restrict customization options.
+3. **Optional Properties:** While the optional nature of ThemeData properties offers flexibility, it also presents a challenge. There is no built-in mechanism to enforce the initialization of specific properties, which can lead to inconsistencies or errors in the multi theme setup.
+4. **Single Theme Property:** One notable limitation of ThemeData is the restriction to defining only one theme property. This means that if there is a need for multiple themes, such as different styles for floating action buttons, ThemeData falls short as it allows for the definition of only a single theme.
 
-```dart
-final ThemeData lightTheme = ThemeData(
-  primaryColor: Colors.white,
-  accentColor: Colors.black,
-  brightness: Brightness.light,
-);
-
-final ThemeData darkTheme = ThemeData(
-  // i can forget to set primaryColor here  
-  // primaryColor: Colors.black,
-  accentColor: Colors.white,
-  brightness: Brightness.dark,
-);
-```
-
-
-2. ThemeData is for Material Widgets only. So if developer is using some custom widgets, then he/she has to create a separate theme for those widgets. Developer could easily forget to add theme extension methods in one of the instances of ThemeData. 
-
-
-```dart
-final ThemeData lightTheme = ThemeData(
-  primaryColor: Colors.white,
-  accentColor: Colors.black,
-  brightness: Brightness.light,
-  extensions: [
-    ColorTheme(
-        primary: Colors.white,
-        secondary: Colors.black,
-        ),
-  ],
-);
-
-final ThemeData darkTheme = ThemeData(
-  primaryColor: Colors.black,
-  accentColor: Colors.white,
-  brightness: Brightness.dark,
-  extensions: [
-    // i can forget to add ColorTheme extension here  
-  ],
-);
-```
-
-3. ThemeData allows you to define only one theme for the whole app. So if developer wants to have different themes for different set of screens, then he/she has to create a separate theme for each screen. Then developer has to override the theme using copyWith method. This can lead to a lot of boilerplate code. 
-
-```dart
-
-final ThemeData lightTheme = ThemeData(
-  primaryColor: Colors.white,
-  accentColor: Colors.black,
-  brightness: Brightness.light,
-);
-
-
-final ThemeData lightThemeForScreen1 = lightTheme.copyWith(
-  primaryColor: Colors.red,
-  accentColor: Colors.blue,
-);
-
-```
+By recognizing these limitations, I was motivated to explore alternative approaches and develop a new theming implementation that overcomes these challenges and provides a more flexible and customizable solution.
 
 # Introduction to New Theming Approach
 
-In this article, I will introduce a new approach for theming in Flutter. This approach will help you to solve all the above-mentioned challenges. This approach will also help you to create consistent UI in your Flutter app. 
+To address the limitations mentioned earlier, I have developed a new and straightforward approach.
+
+The key to this approach is encapsulating the ThemeData class within a custom class and utilizing abstract properties. These abstract properties can encompass both the default ThemeData properties and any additional custom theme properties we desire.
+
+By utilizing abstract properties, we ensure that the necessary properties are initialized and defined in each specific implementation of the custom class. This enforcement promotes consistency and reduces the risk of errors during the theming process.
+
+By leveraging the abstract properties to define the ThemeData class in base custom class, we gain the ability to create distinct themes with unique configurations without the need to override the ThemeData class in implementing classes. Developers can customize various aspects of the theme, such as colors, typography, and more, based on their specific app requirements.
+
+With this new theming approach, developers can achieve a higher level of flexibility and control, allowing for the creation of multiple theme variations within a single app. By providing a structured and enforceable way to define theme properties.
+
+In the following sections, I will provide concrete examples and code snippets to demonstrate the implementation and usage of this new theming approach in Flutter.
 
 
-Define your color theme extension class. This class will be used to define the color theme for your app. 
+Create a wrapper class to encapsulate the ThemeData class. This class will be used to define the theme for your app. 
+
+```dart
+abstract class AppTheme {
+  ThemeData get themeData {
+    return ThemeData();
+  }
+}
+```
+
+Create and add abstract property to the wrapper class to define the theme properties.
 
 ```dart
 
@@ -119,12 +84,8 @@ class ColorTheme extends ThemeExtension<ColorTheme> {
 
 ```
 
-Create a wrapper over ThemeData class. This wrapper will be used to define the theme for your app. 
-
 ```dart
 abstract class AppTheme {
-  ColorTheme get colorTheme;
-
   ThemeData get themeData {
     return ThemeData(
       primaryColor: colorTheme.primaryColor,
@@ -133,48 +94,46 @@ abstract class AppTheme {
         ],
     );
   }
-}
 
+  ColorTheme get colorTheme;
+}
 ```
 
-Create Implementation of AppTheme. 
+Now, we can create a new class that extends the AppTheme class and implements the abstract properties.
 
 ```dart
 class LightTheme extends AppTheme {
   @override
-  final ColorTheme colorTheme = ColorTheme(
-    primaryColor: Colors.white,
-  );
+  ColorTheme get colorTheme => ColorTheme(
+        primaryColor: Colors.white,
+      );
 }
-
-class DarkTheme extends AppTheme {
-  @override
-  final ColorTheme colorTheme = ColorTheme(
-    primaryColor: Colors.black,
-  );
-}
-
 ```
 
-How to use this approach in your app? 
+```dart
+class DarkTheme extends AppTheme {
+  @override
+  ColorTheme get colorTheme => ColorTheme(
+        primaryColor: Colors.black,
+      );
+}
+```
 
+Finally, we can use the themeData property to access the ThemeData class and apply the theme to our app.
 
 ```dart
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: LightTheme().themeData,
+      darkTheme: DarkTheme().themeData,
+      home: MyHomePage(),
+    );
+  }
+}
 
-
-final AppTheme lightTheme = LightTheme();
-final AppTheme darkTheme = DarkTheme();
-final ThemeData lightThemeData = lightTheme.themeData;
-final ThemeData darkThemeData = darkTheme.themeData;
-
-MaterialApp(
-  theme: lightThemeData,
-  darkTheme: darkThemeData,
-  themeMode: ThemeMode.system,
-  home: HomeScreen(),
-);
-
-class HomeScreen extends StatelessWidget {
+class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorTheme = context.colorTheme.primaryColor;
@@ -187,11 +146,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-extension XBuildContext on BuildContext {
-  ThemeData get theme => Theme.of(this);
-  ColorTheme get colorTheme => theme.extension<ColorTheme>()!;
-}
-
-
 ```
+
+# Conclusion
+
+In this article, I have introduced a new approach to theming in Flutter that provides a more flexible and customizable solution. By encapsulating the ThemeData class within a custom class and utilizing abstract properties, we can create distinct themes with unique configurations without the need to override the ThemeData class in implementing classes. This approach also allows for the creation of multiple theme variations within a single app, providing a structured and enforceable way to define theme properties.
