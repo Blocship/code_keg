@@ -91,12 +91,13 @@ Now the updated AppTheme class will look like this:
 
 ```dart
 abstract class AppTheme {
-  
   ColorTheme get colorTheme;
+  Brightness get brightness;
 
   ThemeData get themeData {
     return ThemeData(
       scaffoldBackgroundColor: colorTheme.primaryColor,
+      brightness: brightness,
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: colorTheme.secondaryColor,
       ),
@@ -117,6 +118,9 @@ class LightTheme extends AppTheme {
     primaryColor: Colors.indigo.shade50,
     secondaryColor: Colors.black,
   );
+
+  @override
+  final Brightness brightness = Brightness.light;
 }
 
 class DarkTheme extends AppTheme {
@@ -125,6 +129,9 @@ class DarkTheme extends AppTheme {
     primaryColor: Colors.indigo.shade700,
     secondaryColor: Colors.white,
   );
+
+  @override
+  final Brightness brightness = Brightness.dark;
 }
 ```
 
@@ -182,8 +189,10 @@ class MyHomePage extends StatelessWidget {
         // Accessing the secondary color from the current theme's color theme extension
         backgroundColor: context.colorTheme.secondaryColor,
       ),
-      body: const Center(
-        child: Text('Hello, World!'),
+      body: Center(
+        child: Text(
+          'Hello, ${Theme.of(context).brightness.name} Themed World!',
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: onChanged,
