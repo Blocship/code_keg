@@ -1,4 +1,4 @@
-<!-- # Title: Revolutionizing Theming in Flutter: A New Approach for Better UI Consistency
+<!-- # Title: Beyond the Basics: A New Theming Approach for Flutter Developers
 
 # Author: [Hashir Shoaib](https://twitter.com/hashirshoaeb)
 # Site: https://hashirshoaeb.com
