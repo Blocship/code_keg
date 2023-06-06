@@ -16,6 +16,7 @@ App configuration is a set of values that are used to configure the app based on
 We will use enums and extensions to implement app configuration in Flutter. The enum will represent the different environments of the app. The extension will be used to map different values based on the current environment.
 
 ```dart
+/// Represents the environment of the app.
 enum Environment {
   qa,
   prod;
@@ -36,6 +37,9 @@ enum Environment {
 The `Environment` enum represents the different environments of the app. The `Environment.from` factory constructor is used to create an instance of `Environment` from a string. This is useful when the environment is set using the `--dart-define` flag in the run command.
 
 ```dart
+/// Holds the current environment of the app.
+/// This is set by dart define flag `--dart-define=flavor=qa` in the run command.
+/// The default value is `qa`.
 final Environment kEnvironment = Environment.from(
   const String.fromEnvironment('flavor', defaultValue: 'qa'),
 );
