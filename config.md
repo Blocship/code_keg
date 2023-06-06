@@ -1,13 +1,48 @@
 ```dart
-enum Environment { qa, prod }
+/// Represents the environment of the app.
+/// - [prod] for production
+/// - [qa] for staging and dev testing
+enum Environment {
+  qa,
+  prod;
 
-final Environment kEnvironment =
-    const String.fromEnvironment('flavor', defaultValue: 'qa').toEnv();
+  factory Environment.from(String env) {
+    switch (env) {
+      case 'prod':
+        return Environment.prod;
+      case 'qa':
+        return Environment.qa;
+      default:
+        throw UnimplementedError('Environment $env is not implemented');
+    }
+  }
+}
 
+/// Holds the current environment of the app.
+/// This is set by dart define flag `--dart-define=flavor=qa` in the run command.
+/// The default value is `qa`.
+final Environment kEnvironment = Environment.from(
+  const String.fromEnvironment('flavor', defaultValue: 'qa'),
+);
+
+/// Holds the current app config.
+/// Returns the correct config based on the current environment.
 abstract class AppConfig {
-  Environment get environment;
+  static String cryptoSecretKey = '3Ddt6vQm63FybcjePBDHtCBQQUtfKYO7';
+  static String cryptoSecretIV = 'Ywn1DasculiznB1P';
   String get baseUrl;
+  String get oneSignalAppId;
+  String get uxCamAppKey;
+  String get mixPanelToken;
+  String get freshChatAppKey;
+  String get freshChatAppId;
+  String get freshChatAppDomain;
+  String get rollbarAccessToken;
+  String get rollbarPackage;
+  Environment get environment;
 
+  /// Factory constructor to create an instance of [AppConfig]
+  /// based on the current environment.
   factory AppConfig() {
     return kEnvironment.map(
       prod: () => _ProdAppConfig(),
@@ -30,20 +65,6 @@ class _StagingAppConfig implements AppConfig {
   final String baseUrl = 'https://api.example.com';
 }
 
-
-extension _XString on String {
-  Environment toEnv() {
-    switch (this) {
-      case 'prod':
-        return Environment.prod;
-      case 'qa':
-        return Environment.qa;
-      default:
-        throw UnimplementedError('Environment $this is not implemented');
-    }
-  }
-}
-
 extension XEnvironment on Environment {
   bool get isProd => this == Environment.prod;
   bool get isStaging => this == Environment.qa;
@@ -63,6 +84,8 @@ extension XEnvironment on Environment {
     }
   }
 
+  /// The [map] method allows mapping different values
+  ///  based on the current environment.
   T map<T>({
     required T Function() prod,
     required T Function() staging,
