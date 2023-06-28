@@ -1,6 +1,19 @@
-<div align="center">
+<!-- <div align="center">
 <img src="READMEdocs/blocship_logo.jpg" alt="Logo" style="max-width: 90px; border-radius: 10px;">
   <p align="center" style="line-height: 50px; font-size: 24px; font-weight: bold;">Code Keg ⭐️</p>
+  <p align="center">
+    Code Keg is a collection of common flutter and dart practices and code snippets that we use at Blocship. 
+    <br />
+    <br />
+    <a href="https://blocship.io">About</a>
+    ·
+    <a href="https://medium.com/blocship">Medium</a>
+  </p>
+</div> -->
+<!-- Inline CSS Not working following is less ugly -->
+<div align="center">
+<img src="READMEdocs/small_logo.png" alt="Logo">
+  <h1 align="center" >Code Keg ⭐️</h1>
   <p align="center">
     Code Keg is a collection of common flutter and dart practices and code snippets that we use at Blocship. 
     <br />
