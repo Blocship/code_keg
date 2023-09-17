@@ -34,6 +34,7 @@
 
 - [Listenable Object](./object_listenable.md)
 - [App Settings](./app_settings.md)
+- [App Version](./app_version.md)
 
 ## How to use
 
