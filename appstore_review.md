@@ -1,0 +1,1 @@
+# Appstore review strategy algorithm
